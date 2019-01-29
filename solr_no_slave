@@ -1,0 +1,47 @@
+# bin/sh
+# chkconfig: 2345 95 20 
+# description: Solr Server 
+# Solr Server service start, stop, restart 
+# @author Shay Anderson 10.13 
+
+SOLR_DIR="/service/solr/ucsindex" 
+cur_time=`date +"%Y-%m-%d"`
+JAVA="/usr/bin/java -Xmx25g -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=3 -XX:GCLogFileSize=10M -XX:+PrintGCDateStamps -XX:+PrintGCDetails -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:G1OldCSetRegionThresholdPercent=50 -XX:G1HeapWastePercent=2 -XX:G1HeapRegionSize=16m -XX:ConcGCThreads=8 -XX:ParallelGCThreads=8 -XX:MaxGCPauseMillis=20000 -XX:+PrintAdaptiveSizePolicy -XX:InitiatingHeapOccupancyPercent=0 -XX:+ParallelRefProcEnabled -Xloggc:/service/solr/logs/gc.log -server -Dcom.sun.management.jmxremote.port=9993 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false  -DSTOP.PORT=8079 -Denable.master=false -Denable.slave=false -DSTOP.KEY=a09df7a0d -Dsolr.solr.home="/service/solr/ucsindex/ucs/" -jar /service/solr/ucsindex/start.jar"
+
+case $1 in 
+      start) 
+            echo "Starting Solr..." 
+            cd $SOLR_DIR 
+            #$JAVA 2>&1 > $LOG_FILE & 
+            $JAVA >/dev/null 2>&1 & 
+            sleep 3
+	     
+            RETVAL=$?
+    	    if [ $RETVAL = 0 ]; then
+        	echo "done."
+    	    else
+        	echo "failed. See error code for more information."
+    	    fi 
+	    ;;
+      stop) 
+            echo "Stopping Solr..." 
+            pkill -f start.jar >/dev/null 
+            RETVAL=$? 
+            if [ $RETVAL -eq 0 ]; then 
+                  echo "Stopped" 
+            else 
+                  echo "Failed to stop" 
+            fi 
+            ;; 
+      restart) 
+            $0 stop 
+            sleep 7 
+            $0 start 
+            ;; 
+      *) 
+            echo "Usage: $0 [start|stop|restart]" 
+            exit 1 
+            ;; 
+esac 
+
+exit 0

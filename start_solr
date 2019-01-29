@@ -1,0 +1,5 @@
+
+PIDFILE=/service/solr/solr.pid
+COMMAND="/service/solr/solr"
+$COMMAND > /dev/null 2>&1 &
+echo $! > $PIDFILE
